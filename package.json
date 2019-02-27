@@ -1,0 +1,52 @@
+{
+  "name": "morningserver",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start-front:dev": "webpack-dev-server --config webpack.js",
+    "start-server:dev": "node server/index.js",
+    "start:dev": "NODE_ENV=development run-p start-server:dev start-front:dev",
+    "build": "webpack --config webpack.js",
+    "start": "NODE_ENV=production node server/index.js"
+  },
+  "dependencies": {
+    "async": "^2.6.1",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.4",
+    "babel-preset-react": "^6.24.1",
+    "body-parser": "^1.18.3",
+    "cross-fetch": "^2.2.1",
+    "ejs": "^2.6.1",
+    "express": "^4.16.3",
+    "express-session": "^1.15.6",
+    "http-proxy-middleware": "^0.17.4",
+    "jwt-simple": "^0.5.5",
+    "passport": "^0.4.0",
+    "passport-flickr": "^0.2.0",
+    "prop-types": "^15.7.2",
+    "react": "^16.4.0",
+    "react-dom": "^16.4.0",
+    "react-redux": "^5.0.7",
+    "react-router-dom": "^4.3.1",
+    "reactstrap": "^6.4.0",
+    "redux": "^4.0.0",
+    "redux-form": "^7.4.2",
+    "redux-thunk": "^2.3.0",
+    "swagger-client": "^3.8.25",
+    "yarn-run-all": "^3.1.1"
+  },
+  "author": "N2B",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-preset-stage-2": "^6.24.1",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.8.2",
+    "webpack": "^4.10.2",
+    "webpack-cli": "^3.0.2",
+    "webpack-dev-server": "^3.1.4"
+  }
+}
