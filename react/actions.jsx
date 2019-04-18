@@ -17,23 +17,29 @@ let listPhotoInterval;
 let showPhotoIdInterval;
 
 function getPhotosAndSelectOne(client, dispatch) {
-    return client.getPhotos({ id: '147032531@N08' }).then(result => {
-        clearInterval(showPhotoIdInterval);
-        let i = 0;
-        dispatch(photoShown(result.body[i]));
-        showPhotoIdInterval = setInterval(() => {
-            i += 1;
-            if (!result.body[i]) {
-                i = 0;
-            }
+    return client.getPhotos({ id: '147032531@N08' })
+        .then(result => {
+            console.log('result!!!', result)
+            clearInterval(showPhotoIdInterval);
+            let i = 0;
             dispatch(photoShown(result.body[i]));
-        }, 10 * 1000);
-    });
+            showPhotoIdInterval = setInterval(() => {
+                i += 1;
+                if (!result.body[i]) {
+                    i = 0;
+                }
+                dispatch(photoShown(result.body[i]));
+            }, 10 * 1000);
+        })
+        .catch(err => {
+            console.log('getPhotosAndSelectOne => err!!', err)
+        });
 }
 
 export function showPhoto() {
     return (dispatch, getState) => {
         const { client } = getState().auth;
+        console.log('showPhoto => client!!!', client);
         getPhotosAndSelectOne(client, dispatch);
         clearInterval(listPhotoInterval);
         listPhotoInterval = setInterval(() => {
@@ -53,7 +59,6 @@ export function getAuth() {
     return fetch('/auth/refresh', { credentials: 'same-origin' })
         .then(response => response.json())
         .then(respJ => {
-            console.log('getAuth() respJ!!', respJ);
             return {
                 user: respJ.user,
                 token: respJ.token,
@@ -66,10 +71,15 @@ export function getAuth() {
 export function login() {
     return dispatch =>
         getAuth().then(infos => {
-            console.log('getAuth() infos!!!', infos);
-            return Swagger('http://127.0.0.1:8383/swagger.json').then(client => {
-                dispatch(createNewClient(client.apis.default));
+            return Swagger('http://127.0.0.1:8383/swagger.json', {
+                authorizations: {
+                    'ui-api': infos.token,
+                },
+            }).then(client => {
+                dispatch(createNewClient(client.apis.ui));
                 Promise.resolve();
+            }).catch(err => {
+                console.log('LOGIN err!!!', err);
             });
         });
 }

@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-const proxy = require('http-proxy-middleware');
 const passport = require('passport');
 const session = require('express-session');
 const jwt = require('jwt-simple');
@@ -11,7 +10,7 @@ const users = require('./users.js');
 
 // PASSPORT
 passport.use(new FlickrStrategy({
-    consumerKey: 'acd08a2259872ec9244be88933d4b805',
+    consumerKey: process.env.FLICKR_KEY,
     consumerSecret: process.env.FLICKR_SECRET,
     callbackURL: 'http://127.0.0.1:3003/auth/flickr/callback',
 }, (token, tokenSecret, profile, done) => {
@@ -21,12 +20,18 @@ passport.use(new FlickrStrategy({
     console.log('profile!!!', profile);
     const user = {
         id: profile.id,
-        flickrProfile: profile,
+        // flickrProfile: profile,
         flickrToken: token,
-        flikrSecretToken: tokenSecret,
+        flickrSecretToken: tokenSecret,
     };
-    users.save(user);
-    return done(null, user);
+    return users.save(user)
+        .then(() => {
+            return done(null, user);
+        })
+        .catch(err => {
+            console.log('users.save(user) => err!!!', err);
+            return done(err, null)
+        });
     // User.findOrCreate({ flickrId: profile.id }, function (err, user) {
     //   return done(err, user);
     // });
@@ -39,14 +44,21 @@ passport.serializeUser((user, done) => {
 
 // used to deserialize the user
 passport.deserializeUser((id, done) => {
-    const user = users.findById(id);
-    console.log('passport.serializeUser  user!!!', user);
-    done(null, user);
+    return users.findById(id)
+        .then(resp => {
+            return done(null, resp.body);
+        })
+        .catch(err => {
+            return done(err, null)
+        });
 });
 
 const app = express();
 
+// a session will be established and maintained via a cookie set in the user's browser.
 app.use(session({
+    // NOTE: USE ENV VAR TO KEEP SECRET SECRET
+    name: 'ba-auth-cookie',
     secret: '123456',
     resave: false,
     saveUninitialized: false,
@@ -65,6 +77,7 @@ app.set('views', path.join(__dirname, '/views'));
 app.use(express.static('public'));
 
 function checkAuthMiddleware(req, res, next) {
+    console.log('req.isAuthenticated()!!!', req.isAuthenticated());
     if (req.isAuthenticated()) {
         return next();
     }
@@ -90,8 +103,9 @@ app.get('/auth/flickr/callback', (req, res) => {
     passport.authenticate('flickr',
         { failureRedirect: '/toto' },
         (err, user, info) => {
+            console.log('callback err!!! =>', err)
+            console.log('callback user!!! =>', user)
             if (err) {
-                console.log('error /auth/flickr/callback => redirect /auth/flickr', err)
                 return res.redirect('/auth/flickr');
             }
             // STEP 4
@@ -117,9 +131,10 @@ app.get('/auth/refresh', (req, res) => {
         exp: (Date.now() / 1000) + (20 * 60),
     };
     console.log('auth/refresh => payload!!!', payload);
-    const token = jwt.encode(payload, 'mysecret');
+    const token = jwt.encode(payload, 'secret');
     const infos = {
-        user: req.user.flickrProfile,
+        // user: req.user.flickrProfile,
+        user: req.user,
         token,
     };
     console.log('auth/refresh => infos!!!', infos);
