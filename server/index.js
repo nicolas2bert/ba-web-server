@@ -12,7 +12,7 @@ const users = require('./users.js');
 passport.use(new FlickrStrategy({
     consumerKey: process.env.FLICKR_KEY,
     consumerSecret: process.env.FLICKR_SECRET,
-    callbackURL: 'http://127.0.0.1:3003/auth/flickr/callback',
+    callbackURL: 'http://localhost:3003/auth/flickr/callback',
 }, (token, tokenSecret, profile, done) => {
     // STEP 3
     console.log('token!!!', token);
