@@ -1,22 +1,22 @@
 const jwt = require('jwt-simple');
 const Swagger = require('swagger-client');
 
-const users = {};
+// for Docker on mac tests
+const apiEndpoint = process.env.DOCKER ? 'http://host.docker.internal:8383' :
+    process.env.API_ENDPOINT;
 
 function getToken() {
     return jwt.encode({ role: 'intern' }, 'secret');
 }
 
 function getClient() {
-    return Swagger('http://127.0.0.1:8383/swagger.json', {
+    return Swagger(`${apiEndpoint}/swagger.json`, {
         authorizations: {
             'intern-api': getToken(),
         },
     }).then(client => {
-        console.log('client.apis!!!', client.apis);
         return client.apis.intern;
     }).catch(err => {
-        console.log('LOGIN err!!!', err);
     });
 }
 

@@ -5,8 +5,9 @@ const passport = require('passport');
 const session = require('express-session');
 const jwt = require('jwt-simple');
 const { Strategy: FlickrStrategy } = require('passport-flickr');
-
 const users = require('./users.js');
+
+const apiEndpoint = process.env.API_ENDPOINT;
 
 // PASSPORT
 passport.use(new FlickrStrategy({
@@ -85,7 +86,7 @@ function checkAuthMiddleware(req, res, next) {
 }
 
 app.get(['/', '/home'], checkAuthMiddleware, (req, res) => {
-    res.render('index.ejs');
+    res.render('index.ejs', { apiEndpoint });
 });
 
 app.get('/auth/flickr',

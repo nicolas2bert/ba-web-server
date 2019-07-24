@@ -9,7 +9,7 @@
 
     </head>
     <body>
-      <div id="app"> </div>
+      <div id="app" api_endpoint="<%= apiEndpoint %>"> </div>
       <% if (process.env.NODE_ENV === 'development') { %>
         <script src="http://localhost:8081/bundle.js"></script>
       <% } else { %>

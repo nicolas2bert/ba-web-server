@@ -39,7 +39,6 @@ function getPhotosAndSelectOne(client, dispatch) {
 export function showPhoto() {
     return (dispatch, getState) => {
         const { client } = getState().auth;
-        console.log('showPhoto => client!!!', client);
         getPhotosAndSelectOne(client, dispatch);
         clearInterval(listPhotoInterval);
         listPhotoInterval = setInterval(() => {
@@ -71,7 +70,9 @@ export function getAuth() {
 export function login() {
     return dispatch =>
         getAuth().then(infos => {
-            return Swagger('http://127.0.0.1:8383/swagger.json', {
+            const appElement = document.getElementById('app');
+            const apiEndpoint = appElement.getAttribute('api_endpoint');
+            return Swagger(`${apiEndpoint}/swagger.json`, {
                 authorizations: {
                     'ui-api': infos.token,
                 },
