@@ -1,4 +1,3 @@
-import { Container } from 'reactstrap';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
@@ -26,15 +25,14 @@ const store = createStore(
 
 const node = document.getElementById('app');
 
-console.log("node!!!", node)
 
 const app = () => {
     console.log("RENDER!!!!")
     ReactDOM.render(
         <Provider store={store}>
-            <Container fluid="true">
+            <div fluid="true">
                 <Routes />
-            </Container>
+            </div>
         </Provider>
         , node,
     );

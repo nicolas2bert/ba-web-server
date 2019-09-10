@@ -1,9 +1,43 @@
 import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Col, Row } from 'reactstrap';
+import styled from 'styled-components';
 import { showPhoto, clearIntervals } from './actions';
-// import Loading from './utils/Loading';
+
+const PhotosContainer = styled.div`
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  position: fixed;
+`;
+
+const Image = styled.div`
+  height: 80%;
+  background-color: inherit;
+`;
+
+const ImageContent = styled.img`
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+`;
+
+const Text = styled.div`
+  height: 10%;
+  background-color: #000;
+  color: #FFF;
+  text-align:center;
+  font-family: 'Quicksand', sans-serif;
+  display:flex;
+`;
+
+const Title = styled.div`
+  font-size: 20px;
+  margin:auto;
+`;
+
+const Description = styled.div`
+`;
 
 class PhotosPresentational extends React.Component {
     // constructor(props) {
@@ -19,18 +53,22 @@ class PhotosPresentational extends React.Component {
     }
     render() {
         const { photo } = this.props;
+        console.log('photo.photoShown!!!', photo.photoShown);
         if (!photo.photoShown) {
             return null;
         }
         const { photoShown } = photo;
         return (
             <div> {
-                <Row>
-                    <Col xs="8" sm="8" md="8" lg="8" className="background-black crop">
-                        <img className="image-center" src={photoShown.url} alt={photoShown.description} />
-                    </Col>
-                    <Col xs="4" sm="4" md="4" lg="4"> <div> {photoShown.description} </div> </Col>
-                </Row>
+                <PhotosContainer>
+                    <Text>
+                        <Title> {photoShown.title} </Title>
+                        <Description> {photoShown.description} </Description>
+                    </Text>
+                    <Image>
+                        <ImageContent src={photoShown.url} alt={photoShown.description} />
+                    </Image>
+                </PhotosContainer>
             }
             </div>
         );

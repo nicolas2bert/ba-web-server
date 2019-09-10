@@ -1,11 +1,20 @@
 import Swagger from 'swagger-client';
 
 export const CREATE_NEW_CLIENT = 'CREATE_NEW_CLIENT';
+export const CREATE_NEW_USER = 'CREATE_NEW_USER';
 export const PHOTO_SHOWN = 'PHOTO_SHOWN';
+
+// Reload data every <RELOAD_TIME> ms
+const FETCH_TIME = 60 * 1000;
 
 export const createNewClient = client => ({
     type: CREATE_NEW_CLIENT,
     client,
+});
+
+export const createNewUser = user => ({
+    type: CREATE_NEW_USER,
+    user,
 });
 
 export const photoShown = photo => ({
@@ -16,12 +25,15 @@ export const photoShown = photo => ({
 let listPhotoInterval;
 let showPhotoIdInterval;
 
-function getPhotosAndSelectOne(client, dispatch) {
-    return client.getPhotos({ id: '147032531@N08' })
+function getPhotosAndSelectOne(client, user, dispatch) {
+    return client.getPhotos({ id: user.id })
         .then(result => {
             console.log('result!!!', result)
-            clearInterval(showPhotoIdInterval);
             let i = 0;
+            const nbrOfPhotos = result.body.length;
+            const newPhotoTime = FETCH_TIME / nbrOfPhotos;
+            console.log('newPhotoTime!!!', newPhotoTime);
+            clearInterval(showPhotoIdInterval);
             dispatch(photoShown(result.body[i]));
             showPhotoIdInterval = setInterval(() => {
                 i += 1;
@@ -29,7 +41,7 @@ function getPhotosAndSelectOne(client, dispatch) {
                     i = 0;
                 }
                 dispatch(photoShown(result.body[i]));
-            }, 10 * 1000);
+            }, newPhotoTime);
         })
         .catch(err => {
             console.log('getPhotosAndSelectOne => err!!', err)
@@ -38,12 +50,13 @@ function getPhotosAndSelectOne(client, dispatch) {
 
 export function showPhoto() {
     return (dispatch, getState) => {
-        const { client } = getState().auth;
-        getPhotosAndSelectOne(client, dispatch);
+        const { client, user } = getState().auth;
+        console.log('user123!!!', user);
+        getPhotosAndSelectOne(client, user, dispatch);
         clearInterval(listPhotoInterval);
         listPhotoInterval = setInterval(() => {
-            getPhotosAndSelectOne(client, dispatch);
-        }, 60 * 1000);
+            getPhotosAndSelectOne(client, user, dispatch);
+        }, FETCH_TIME);
     };
 }
 
@@ -72,13 +85,14 @@ export function login() {
         getAuth().then(infos => {
             const appElement = document.getElementById('app');
             const apiEndpoint = appElement.getAttribute('api_endpoint');
+            dispatch(createNewUser({ id: infos.user.id }));
             return Swagger(`${apiEndpoint}/swagger.json`, {
                 authorizations: {
                     'ui-api': infos.token,
                 },
             }).then(client => {
                 dispatch(createNewClient(client.apis.ui));
-                Promise.resolve();
+                // Promise.resolve();
             }).catch(err => {
                 console.log('LOGIN err!!!', err);
             });

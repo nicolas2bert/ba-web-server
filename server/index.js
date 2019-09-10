@@ -8,12 +8,13 @@ const { Strategy: FlickrStrategy } = require('passport-flickr');
 const users = require('./users.js');
 
 const apiEndpoint = process.env.API_ENDPOINT;
+const flickrCallbackURL = process.env.FLICKR_CALLBACK_URL || 'http://localhost:3003/auth/flickr/callback';
 
 // PASSPORT
 passport.use(new FlickrStrategy({
     consumerKey: process.env.FLICKR_KEY,
     consumerSecret: process.env.FLICKR_SECRET,
-    callbackURL: 'http://localhost:3003/auth/flickr/callback',
+    callbackURL: flickrCallbackURL,
 }, (token, tokenSecret, profile, done) => {
     // STEP 3
     console.log('token!!!', token);
@@ -47,9 +48,11 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser((id, done) => {
     return users.findById(id)
         .then(resp => {
+            console.log('passport.deserializeUser >> resp!!!', resp);
             return done(null, resp.body);
         })
         .catch(err => {
+            console.log('passport.deserializeUser >> err!!!', err);
             return done(err, null)
         });
 });
